@@ -1,0 +1,96 @@
+<dom-module id="at-carbon-time-picker-styles">
+  <template>
+    <style>
+      .clock {
+        @apply(--layout-vertical);
+        padding: 4px;
+        margin: 4px;
+        @apply(--at-form-daterange-calendar-border);
+        background: var(--at-form-daterange-calendar-background-color);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.176);
+        min-width: 250px;
+      }
+
+      .pick-time {
+        @apply(--layout-horizontal);
+      }
+
+      .pick-time.hidden {
+        display: none;
+      }
+
+      .hours {
+        @apply(--layout-vertical);
+        @apply(--layout-flex-4);
+        align-content: center;
+        justify-content: center;
+      }
+
+      .hour,
+      .minute,
+      .second {
+        @apply(--at-form-label-font);
+        font-size: 18px;
+        font-weight: bold;
+        margin: 12px;
+        text-align: center;
+        height: 64px;
+        line-height: 64px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .hour:hover,
+      .minute:hover,
+      .second:hover {
+        background: var(--at-form-daterange-calendar-item-hover-background-color);
+      }
+
+      .minutes {
+        @apply(--layout-vertical);
+        @apply(--layout-flex-4);
+        align-content: center;
+        justify-content: center;
+      }
+
+      .seconds {
+        @apply(--layout-vertical);
+        @apply(--layout-flex-4);
+        align-content: center;
+        justify-content: center;
+      }
+
+      .divider {
+        align-self: center;
+      }
+
+      .clock-button {
+        align-self: center;
+      }
+
+      .clock-button:hover {
+        @apply(--shadow-elevation-2dp);
+      }
+
+      .clock-row {
+        @apply(--layout-horizontal);
+        align-items: center;
+        justify-content: center;
+      }
+
+      .fast-pick-hour {
+        @apply(--layout-flex);
+        @apply(--at-form-label-font);
+        text-align: center;
+        height: 32px;
+        line-height: 32px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .fast-pick-hour:hover {
+        background: var(--at-form-daterange-calendar-item-hover-background-color);
+      }
+    </style>
+  </template>
+</dom-module>

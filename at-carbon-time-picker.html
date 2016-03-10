@@ -1,0 +1,207 @@
+<link rel="import" href="../tangere/tangere.html">
+<link rel="import" href="../at-theme/at-theme.html">
+<link rel="import" href="../at-i18n/at-i18n-behavior.html">
+<link rel="import" href="../at-carbon-icon-button/at-carbon-icon-button.html">
+<link rel="import" href="../at-carbon-moment/momentjs-import.html">
+<link rel="import" href="styles/styles.html">
+
+<dom-module id="at-carbon-time-picker">
+  <template>
+    <style include="at-form-common"></style>
+    <style include="at-carbon-time-picker-styles"></style>
+    <style></style>
+    <div class="clock">
+      <div id="pickTime" class="pick-time">
+        <div id="clockHours" class="hours">
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-up" on-tap="_incHours"></at-carbon-icon-button>
+          <div id="hour" class="hour" on-tap="_hourTapped">12</div>
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-down" on-tap="_decHours"></at-carbon-icon-button>
+        </div>
+        <div class="divider">:</div>
+        <div id="clockMinutes" class="minutes">
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-up" on-tap="_incMinutes"></at-carbon-icon-button>
+          <div id="minute" class="minute" on-tap="_minuteTapped">13</div>
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-down" on-tap="_decMinutes"></at-carbon-icon-button>
+        </div>
+        <div class="divider">:</div>
+        <div id="secondsMinutes" class="seconds">
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-up" on-tap="_incSeconds"></at-carbon-icon-button>
+          <div id="second" class="second" on-tap="_secondTapped">14</div>
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-down" on-tap="_decSeconds"></at-carbon-icon-button>
+        </div>
+      </div>
+      <div id="fastPickHours" class="fast-pick-hours hidden">
+        <div class="clock-row">
+          <div class="fast-pick-hour" on-tap="_itemTapped">00</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">01</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">02</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">03</div>
+        </div>
+        <div class="clock-row">
+          <div class="fast-pick-hour" on-tap="_itemTapped">04</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">05</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">06</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">07</div>
+        </div>
+        <div class="clock-row">
+          <div class="fast-pick-hour" on-tap="_itemTapped">08</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">09</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">10</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">11</div>
+        </div>
+        <div id="pick24hours">
+          <div class="clock-row">
+            <div class="fast-pick-hour" on-tap="_itemTapped">12</div>
+            <div class="fast-pick-hour" on-tap="_itemTapped">13</div>
+            <div class="fast-pick-hour" on-tap="_itemTapped">14</div>
+            <div class="fast-pick-hour" on-tap="_itemTapped">15</div>
+          </div>
+          <div class="clock-row">
+            <div class="fast-pick-hour" on-tap="_itemTapped">16</div>
+            <div class="fast-pick-hour" on-tap="_itemTapped">17</div>
+            <div class="fast-pick-hour" on-tap="_itemTapped">18</div>
+            <div class="fast-pick-hour" on-tap="_itemTapped">19</div>
+          </div>
+          <div class="clock-row">
+            <div class="fast-pick-hour" on-tap="_itemTapped">20</div>
+            <div class="fast-pick-hour" on-tap="_itemTapped">21</div>
+            <div class="fast-pick-hour" on-tap="_itemTapped">22</div>
+            <div class="fast-pick-hour" on-tap="_itemTapped">23</div>
+          </div>
+        </div>
+      </div>
+      <div id="fastPickMinutesSeconds" class="fast-pick-minutes-seconds hidden">
+        <div class="clock-row">
+          <div class="fast-pick-hour" on-tap="_itemTapped">00</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">05</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">10</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">15</div>
+        </div>
+        <div class="clock-row">
+          <div class="fast-pick-hour" on-tap="_itemTapped">20</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">25</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">30</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">35</div>
+        </div>
+        <div class="clock-row">
+          <div class="fast-pick-hour" on-tap="_itemTapped">40</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">45</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">50</div>
+          <div class="fast-pick-hour" on-tap="_itemTapped">55</div>
+        </div>
+      </div>
+    </div>
+
+  </template>
+  <script>
+    'use strict';
+    Polymer({
+      is: 'at-carbon-time-picker',
+      behaviors: [Tangere.behaviors.i18n],
+      properties: {
+        value: {
+          type: String,
+          value: '',
+          notify: true,
+          observer: 'valueChanged'
+        }
+      },
+      ready: function () {
+        this._initializeAtCarbonTimePicker();
+      },
+      valueChanged: function (newValue, oldValue) {
+        this._initializeAtCarbonTimePicker();
+
+        var locale = this.getLocale();
+        var currentMoment = moment(newValue, this._format, true).locale(locale);
+
+        if (currentMoment.isValid()) {
+          this._currentMoment = currentMoment;
+          this._refreshClock();
+        }
+      },
+      _initializeAtCarbonTimePicker: function () {
+        if (this._isInitialized) {
+          return;
+        }
+        this._isInitialized = true;
+
+        this._format = this._localizedFormat("time");
+
+        var locale = this.getLocale();
+        var currentMoment = moment(this.value, this._format, true).locale(locale);
+
+        if (currentMoment.isValid()) {
+          this._currentMoment = currentMoment;
+        } else {
+          this._currentMoment = moment().locale(locale);
+        }
+        this._updateValue();
+
+        this._refreshClock();
+      },
+      _hourTapped: function (event) {
+        this._pickMode = "pick-hour";
+        this.toggleClass('hidden', true, this.$.pickTime);
+        this.toggleClass('hidden', false, this.$.fastPickHours);
+      },
+      _minuteTapped: function (event) {
+        this._pickMode = "pick-minute";
+        this.toggleClass('hidden', true, this.$.pickTime);
+        this.toggleClass('hidden', false, this.$.fastPickMinutesSeconds);
+      },
+      _secondTapped: function (event) {
+        this._pickMode = "pick-second";
+        this.toggleClass('hidden', true, this.$.pickTime);
+        this.toggleClass('hidden', false, this.$.fastPickMinutesSeconds);
+      },
+      _itemTapped: function (event) {
+        if (this._pickMode === "pick-hour") {
+          this.toggleClass('hidden', true, this.$.fastPickHours);
+        } else {
+          // this._pickMode === "pick-minute"
+          // this._pickMode === "pick-second")
+          this.toggleClass('hidden', true, this.$.fastPickMinutesSeconds);
+        }
+        this.toggleClass('hidden', false, this.$.pickTime);
+        // debugger;
+      },
+      _incHours: function (event) {
+        this._currentMoment.add(1, 'h');
+        this._updateValue();
+      },
+      _decHours: function (event) {
+        this._currentMoment.add(-1, 'h');
+        this._updateValue();
+      },
+      _incMinutes: function (event) {
+        this._currentMoment.add(1, 'm');
+        this._updateValue();
+      },
+      _decMinutes: function (event) {
+        this._currentMoment.add(-1, 'm');
+        this._updateValue();
+      },
+      _incSeconds: function (event) {
+        this._currentMoment.add(1, 's');
+        this._updateValue();
+      },
+      _decSeconds: function (event) {
+        this._currentMoment.add(-1, 's');
+        this._updateValue();
+      },
+      _updateValue: function () {
+        this.value = this._currentMoment.format(this._format);
+      },
+      _refreshClock: function () {
+        var cm = this._currentMoment;
+        var hour = cm.hour();
+        var minute = cm.minute();
+        var second = cm.format('ss');
+        Polymer.dom(this.$.hour).innerHTML = hour;
+        Polymer.dom(this.$.minute).innerHTML = minute;
+        Polymer.dom(this.$.second).innerHTML = second;
+      }
+    });
+  </script>
+</dom-module>
