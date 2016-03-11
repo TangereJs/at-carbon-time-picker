@@ -23,16 +23,19 @@
           <div id="minute" class="minute" on-tap="_minuteTapped">13</div>
           <at-carbon-icon-button class="clock-button" icon="now:arrow-down" on-tap="_decMinutes"></at-carbon-icon-button>
         </div>
-        <div class="divider">:</div>
-        <div id="secondsMinutes" class="seconds">
+        <div id="secondsDivider" class="divider">:</div>
+        <div id="clockSeconds" class="seconds">
           <at-carbon-icon-button class="clock-button" icon="now:arrow-up" on-tap="_incSeconds"></at-carbon-icon-button>
           <div id="second" class="second" on-tap="_secondTapped">14</div>
           <at-carbon-icon-button class="clock-button" icon="now:arrow-down" on-tap="_decSeconds"></at-carbon-icon-button>
         </div>
+        <div id="clockMeridiem" class="meridiem hidden" on-tap="_changeMeridiem">
+          <div id="meridiem" class="meridiem-button">AM</div>
+        </div>
       </div>
       <div id="fastPickHours" class="fast-pick-hours hidden">
         <div class="clock-row">
-          <div class="fast-pick-hour" on-tap="_itemTapped">00</div>
+          <div id="fastPickHoursFirstHour" class="fast-pick-hour" on-tap="_itemTapped">00</div>
           <div class="fast-pick-hour" on-tap="_itemTapped">01</div>
           <div class="fast-pick-hour" on-tap="_itemTapped">02</div>
           <div class="fast-pick-hour" on-tap="_itemTapped">03</div>
@@ -49,7 +52,7 @@
           <div class="fast-pick-hour" on-tap="_itemTapped">10</div>
           <div class="fast-pick-hour" on-tap="_itemTapped">11</div>
         </div>
-        <div id="pick24hours">
+        <div id="pick24Hours">
           <div class="clock-row">
             <div class="fast-pick-hour" on-tap="_itemTapped">12</div>
             <div class="fast-pick-hour" on-tap="_itemTapped">13</div>
@@ -127,6 +130,30 @@
         this._isInitialized = true;
 
         this._format = this._localizedFormat("time");
+        var format = this._format;
+        var self = this;
+        if (this._format.indexOf('A') != -1) {
+          // time format contains AM/PM
+          format = this._format.replace(" A", "");
+          this._usesMeridiem = true;
+        }
+        this.toggleClass('hidden', !this._usesMeridiem, this.$.clockMeridiem);
+
+        if (format.indexOf(':') != -1) {
+          var formatParts = format.split(':');
+          formatParts.forEach(function (part, index) {
+            if (part.indexOf('h') != -1 || part.indexOf('H') != -1){
+              self._hourFormat = part;
+            } else if (part.indexOf('m') != -1) {
+              self._minuteFormat = part;
+            } else if (part.indexOf('s') != -1) {
+              self._secondsFormat = part;
+            }
+          });
+        }
+        var noSeconds = !this._secondsFormat;
+        this.toggleClass('hidden', noSeconds, this.$.secondsDivider);
+        this.toggleClass('hidden', noSeconds, this.$.clockSeconds);
 
         var locale = this.getLocale();
         var currentMoment = moment(this.value, this._format, true).locale(locale);
@@ -140,8 +167,24 @@
 
         this._refreshClock();
       },
+      _is24HourFormat: function () {
+        return this._hourFormat !== undefined && this._hourFormat.indexOf('H') !== -1;
+      },
       _hourTapped: function (event) {
         this._pickMode = "pick-hour";
+        var is24Hours = this._is24HourFormat();
+        if (!is24Hours) {
+          this.$.fastPickHoursFirstHour.textContent = '12';
+        } else {
+          this.$.fastPickHoursFirstHour.textContent = '00';
+          var hourItems = Polymer.dom(this.$.fastPickHours).querySelectorAll('.fast-pick-hour');
+          hourItems.forEach(function (item, index) {
+            Polymer.dom(item).classList.add('half');
+          });
+        }
+
+        this.toggleClass('hidden', !is24Hours, this.$.pick24Hours);
+
         this.toggleClass('hidden', true, this.$.pickTime);
         this.toggleClass('hidden', false, this.$.fastPickHours);
       },
@@ -158,13 +201,28 @@
       _itemTapped: function (event) {
         if (this._pickMode === "pick-hour") {
           this.toggleClass('hidden', true, this.$.fastPickHours);
+          try {
+            var value = parseInt(event.target.textContent);
+              this._currentMoment.hours(value);
+          } catch(e) {
+            console.log(e);
+          }
         } else {
-          // this._pickMode === "pick-minute"
-          // this._pickMode === "pick-second")
           this.toggleClass('hidden', true, this.$.fastPickMinutesSeconds);
+          try {
+            var value = parseInt(event.target.textContent);
+            if (this._pickMode === "pick-minute") {
+              this._currentMoment.minutes(value);
+            } else {
+              // this._pickMode === "pick-second"
+              this._currentMoment.seconds(value);
+            }
+          } catch(e) {
+            console.log(e);
+          }
         }
         this.toggleClass('hidden', false, this.$.pickTime);
-        // debugger;
+        this._updateValue();
       },
       _incHours: function (event) {
         this._currentMoment.add(1, 'h');
@@ -190,17 +248,37 @@
         this._currentMoment.add(-1, 's');
         this._updateValue();
       },
+      _changeMeridiem: function (event) {
+        var meridiemText = this.$.meridiem.textContent;
+        if (meridiemText === "AM") {
+          this._currentMoment.add(-12, 'h');
+        } else {
+          this._currentMoment.add(12, 'h');
+        }
+        this._refreshClock();
+        this._updateValue();
+      },
       _updateValue: function () {
         this.value = this._currentMoment.format(this._format);
       },
       _refreshClock: function () {
         var cm = this._currentMoment;
-        var hour = cm.hour();
-        var minute = cm.minute();
-        var second = cm.format('ss');
+
+        var hour = cm.format(this._hourFormat);
         Polymer.dom(this.$.hour).innerHTML = hour;
+
+        var minute = cm.format(this._minuteFormat);
         Polymer.dom(this.$.minute).innerHTML = minute;
-        Polymer.dom(this.$.second).innerHTML = second;
+
+        if (this._secondsFormat) {
+          var second = cm.format(this._secondsFormat);
+          Polymer.dom(this.$.second).innerHTML = second;
+        }
+
+        if (this._usesMeridiem) {
+          var meridiem = cm.format("A");
+          Polymer.dom(this.$.meridiem).innerHTML = meridiem;
+        }
       }
     });
   </script>

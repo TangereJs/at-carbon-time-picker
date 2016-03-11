@@ -32,12 +32,12 @@
         @apply(--at-form-label-font);
         font-size: 18px;
         font-weight: bold;
-        margin: 12px;
         text-align: center;
         height: 64px;
         line-height: 64px;
         border-radius: 4px;
         cursor: pointer;
+        @apply(--unselectable);
       }
 
       .hour:hover,
@@ -60,8 +60,45 @@
         justify-content: center;
       }
 
+      .meridiem {
+        @apply(--layout-vertical);
+        @apply(--layout-flex-2);
+        align-content: center;
+        justify-content: center;
+        margin: 0 12px 0 6px;
+      }
+
+      .meridiem.hidden {
+        display: none;
+      }
+
+      .meridiem-button {
+        @apply(--at-form-label-font);
+        font-size: 18px;
+        font-weight: bold;
+        height: 64px;
+        line-height: 64px;
+        border-radius: 4px;
+        text-align: center;
+        @apply(--unselectable);
+      }
+
+      .meridiem-button:hover {
+        background: var(--at-form-daterange-calendar-item-hover-background-color);
+      }
+
+      .seconds.hidden {
+        display: none;
+      }
+
       .divider {
+        margin: 12px;
         align-self: center;
+        @apply(--unselectable);
+      }
+
+      .divider.hidden {
+        display: none;
       }
 
       .clock-button {
@@ -82,10 +119,16 @@
         @apply(--layout-flex);
         @apply(--at-form-label-font);
         text-align: center;
-        height: 32px;
-        line-height: 32px;
+        height: 64px;
+        line-height: 64px;
         border-radius: 4px;
         cursor: pointer;
+        @apply(--unselectable);
+      }
+
+      .fast-pick-hour.half {
+        height: 32px;
+        line-height: 32px;
       }
 
       .fast-pick-hour:hover {
