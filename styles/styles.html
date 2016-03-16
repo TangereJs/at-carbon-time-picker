@@ -6,6 +6,7 @@
         padding: 4px;
         margin: 4px;
         min-width: 250px;
+        @apply(--at-picker-background); /* this is required because paper-shadow doesn't set bakcground color */
         position: relative; /* position relative is required by paper-shadow */
       }
 
