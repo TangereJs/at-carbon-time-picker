@@ -13,21 +13,21 @@
     <div class="clock">
       <div id="pickTime" class="pick-time">
         <div id="clockHours" class="hours">
-          <at-carbon-icon-button class="clock-button" icon="now:arrow-up" on-tap="_incHours"></at-carbon-icon-button>
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-up" on-tap="_incHours" at-form-id="at-carbon-time-picker-hours-up"></at-carbon-icon-button>
           <div id="hour" class="hour" on-tap="_hourTapped">12</div>
-          <at-carbon-icon-button class="clock-button" icon="now:arrow-down" on-tap="_decHours"></at-carbon-icon-button>
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-down" on-tap="_decHours" at-form-id="at-carbon-time-picker-hours-down"></at-carbon-icon-button>
         </div>
         <div class="divider">:</div>
         <div id="clockMinutes" class="minutes">
-          <at-carbon-icon-button class="clock-button" icon="now:arrow-up" on-tap="_incMinutes"></at-carbon-icon-button>
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-up" on-tap="_incMinutes" at-form-id="at-carbon-time-picker-minutes-up"></at-carbon-icon-button>
           <div id="minute" class="minute" on-tap="_minuteTapped">13</div>
-          <at-carbon-icon-button class="clock-button" icon="now:arrow-down" on-tap="_decMinutes"></at-carbon-icon-button>
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-down" on-tap="_decMinutes" at-form-id="at-carbon-time-picker-minutes-down"></at-carbon-icon-button>
         </div>
         <div id="secondsDivider" class="divider">:</div>
         <div id="clockSeconds" class="seconds">
-          <at-carbon-icon-button class="clock-button" icon="now:arrow-up" on-tap="_incSeconds"></at-carbon-icon-button>
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-up" on-tap="_incSeconds" at-form-id="at-carbon-time-picker-seconds-up"></at-carbon-icon-button>
           <div id="second" class="second" on-tap="_secondTapped">14</div>
-          <at-carbon-icon-button class="clock-button" icon="now:arrow-down" on-tap="_decSeconds"></at-carbon-icon-button>
+          <at-carbon-icon-button class="clock-button" icon="now:arrow-down" on-tap="_decSeconds" at-form-id="at-carbon-time-picker-seconds-down"></at-carbon-icon-button>
         </div>
         <div id="clockMeridiem" class="meridiem hidden" on-tap="_changeMeridiem">
           <div id="meridiem" class="meridiem-button">AM</div>
