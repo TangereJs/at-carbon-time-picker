@@ -154,6 +154,9 @@
         this.toggleClass('hidden', noSeconds, this.$.secondsDivider);
         this.toggleClass('hidden', noSeconds, this.$.clockSeconds);
 
+        var is24Hours = this._is24HourFormat();        
+        this.toggleClass('hidden', !is24Hours, this.$.pick24Hours);
+
         var locale = this.getLocale();
         var currentMoment = moment(this.value, this._format, true).locale(locale);
 
@@ -202,7 +205,7 @@
           this.toggleClass('hidden', true, this.$.fastPickHours);
           try {
             var value = parseInt(event.target.textContent);
-              this._currentMoment.hours(value);
+            this._currentMoment.hours(value);
           } catch(e) {
             console.log(e);
           }

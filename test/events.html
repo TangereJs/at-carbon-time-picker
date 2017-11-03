@@ -1,0 +1,251 @@
+<!doctype html>
+
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>at-carbon-time-picker tests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <link rel="import" href="../at-carbon-time-picker.html">
+  <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html" />
+
+</head>
+<body>
+
+  <!-- initial state -->
+  <test-fixture id="initialState">
+    <template>
+      <at-carbon-time-picker></at-carbon-time-picker>
+    </template>
+  </test-fixture>
+  
+  <!-- invalid value set -->
+  <test-fixture id="invalidValueSet">
+    <template>
+      <at-carbon-time-picker value="13:49:30"></at-carbon-time-picker>
+    </template>
+  </test-fixture>
+
+  <!-- valid value set -->
+  <test-fixture id="validValueSet">
+    <template>
+      <at-carbon-time-picker value="01:49 PM"></at-carbon-time-picker>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('basic', function() {
+
+      function assertPropertyValue(el, pName, pValue) {
+        assert.equal(el[pName], pValue);
+      }
+
+      function assertPropertyValueDeep(el, pName, pValue) {
+        assert.deepEqual(el[pName], pValue); 
+      }
+
+      function assertAttributeValue(el, attrName, attrValue) {
+        var attr = el.getAttribute(attrName);
+        assert.equal(attr, attrValue);
+      }
+
+      function getComputedStyleValue(el, pName) {
+        var cmpStyle = window.getComputedStyle(el);
+        return cmpStyle.getPropertyValue(pName);
+      }
+
+      function getQueryRoot(el) {        
+        return el.shadowRoot || el;
+      }
+
+      function assertInitialState(el) {
+        var initialValue = el._currentMoment.format(el._format);
+        assertPropertyValue(el, 'value', initialValue);
+      }
+
+      function assertStateForInvalidValue(el, invalidValue) {
+        assertPropertyValue(el, 'value', invalidValue);
+      }
+
+      function assertStateForValidValue(el) { 
+        assertPropertyValue(el, 'value', '01:49 PM');
+      }
+
+      var validValues = [
+        "01:49 AM", "01:49 PM", "03:33 PM", "03:33 AM", "11:49 PM", "11:49 AM", "15:49 AM", "15:49 PM"
+      ];
+      
+      suite('tests where properties are set as attributes', function() {
+        
+
+        test('test initial state', function(done) {
+          var el = fixture('initialState');
+          assertInitialState(el);
+
+          var eventCount = 0;
+          // attach to value-changed
+          el.addEventListener('value-changed', function(event) {
+            var curVal = event.detail.value;
+            var expVal = validValues[eventCount];
+            assert.equal(curVal, expVal);
+            eventCount +=1;
+          });
+          
+          // set a new value
+          validValues.forEach(function(value) { 
+            el.value = value;
+          });
+
+          // assert that event has been fired once
+          flush(function(){
+            assert.equal(eventCount, validValues.length);
+            done();
+          });
+        });
+
+        test('invalid value is set', function(done) {
+          var el = fixture('invalidValueSet');
+
+          var initialValue = el._currentMoment.format(el._format);
+          assertStateForInvalidValue(el, initialValue);
+
+          var eventCount = 0;
+          // attach to value-changed
+          el.addEventListener('value-changed', function(event) {
+            var curVal = event.detail.value;
+            var expVal = validValues[eventCount];
+            assert.equal(curVal, expVal);
+            eventCount +=1;
+          });
+          
+          // set a new value
+          validValues.forEach(function(value) { 
+            el.value = value;
+          });
+
+          // assert that event has been fired once
+          flush(function(){
+            assert.equal(eventCount, validValues.length);
+            done();
+          });
+        });
+
+        test('valid value is set', function(done) {
+          var el = fixture('validValueSet');
+          assertStateForValidValue(el);
+          
+          var eventCount = 0;
+          // attach to value-changed
+          el.addEventListener('value-changed', function(event) {
+            var curVal = event.detail.value;
+            var expVal = validValues[eventCount];
+            assert.equal(curVal, expVal);
+            eventCount +=1;
+          });
+          
+          // set a new value
+          validValues.forEach(function(value) { 
+            el.value = value;
+          });
+
+          // assert that event has been fired once
+          flush(function(){
+            assert.equal(eventCount, validValues.length);
+            done();
+          });          
+        });
+
+      });
+    
+      suite('tests were properties are set in code', function() {
+
+        test('test initial state', function(done) {
+          var el = fixture('initialState');
+          assertInitialState(el);
+
+          var eventCount = 0;
+          // attach to value-changed
+          el.addEventListener('value-changed', function(event) {
+            var curVal = event.detail.value;
+            var expVal = validValues[eventCount];
+            assert.equal(curVal, expVal);
+            eventCount +=1;
+          });
+          
+          // set a new value
+          validValues.forEach(function(value) { 
+            el.value = value;
+          });
+
+          // assert that event has been fired once
+          flush(function(){
+            assert.equal(eventCount, validValues.length);
+            done();
+          });             
+        });
+
+        test('invalid value is set', function(done) {
+          var el = fixture('invalidValueSet');
+          assertInitialState(el);
+
+          var invalidValue = "13:49:00";
+          el.value = invalidValue;
+          assertStateForInvalidValue(el, invalidValue);
+
+          var eventCount = 0;
+          // attach to value-changed
+          el.addEventListener('value-changed', function(event) {
+            var curVal = event.detail.value;
+            var expVal = validValues[eventCount];
+            assert.equal(curVal, expVal);
+            eventCount +=1;
+          });
+          
+          // set a new value
+          validValues.forEach(function(value) { 
+            el.value = value;
+          });
+
+          // assert that event has been fired once
+          flush(function(){
+            assert.equal(eventCount, validValues.length);
+            done();
+          });   
+        });
+
+        test('valid value is set', function(done) {
+          var el = fixture('validValueSet');
+          assertStateForValidValue(el);
+
+          el.value = "01:49 PM";
+          assertStateForValidValue(el);
+
+          var eventCount = 0;
+          // attach to value-changed
+          el.addEventListener('value-changed', function(event) {
+            var curVal = event.detail.value;
+            var expVal = validValues[eventCount];
+            assert.equal(curVal, expVal);
+            eventCount +=1;
+          });
+          
+          // set a new value
+          validValues.forEach(function(value) { 
+            el.value = value;
+          });
+
+          // assert that event has been fired once
+          flush(function(){
+            assert.equal(eventCount, validValues.length);
+            done();
+          });
+        });
+
+      });
+
+    });
+  </script>
+</body>
+</html>

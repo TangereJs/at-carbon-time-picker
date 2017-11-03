@@ -1,0 +1,333 @@
+<!doctype html>
+
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>at-carbon-time-picker tests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <link rel="import" href="../at-carbon-time-picker.html">
+  <link rel="import" href="../../iron-test-helpers/iron-test-helpers.html" />
+
+</head>
+<body>
+
+  <!-- initial state -->
+  <test-fixture id="initialState">
+    <template>
+      <at-carbon-time-picker></at-carbon-time-picker>
+    </template>
+  </test-fixture>
+  
+  <!-- invalid value set -->
+  <test-fixture id="invalidValueSet">
+    <template>
+      <at-carbon-time-picker value="13:49:30"></at-carbon-time-picker>
+    </template>
+  </test-fixture>
+
+  <!-- valid value set -->
+  <test-fixture id="validValueSet">
+    <template>
+      <at-carbon-time-picker value="01:49 PM"></at-carbon-time-picker>
+    </template>
+  </test-fixture>
+
+  <script>
+    suite('basic', function() {
+
+      function assertPropertyValue(el, pName, pValue) {
+        assert.equal(el[pName], pValue);
+      }
+
+      function assertPropertyValueDeep(el, pName, pValue) {
+        assert.deepEqual(el[pName], pValue); 
+      }
+
+      function assertAttributeValue(el, attrName, attrValue) {
+        var attr = el.getAttribute(attrName);
+        assert.equal(attr, attrValue);
+      }
+
+      function getComputedStyleValue(el, pName) {
+        var cmpStyle = window.getComputedStyle(el);
+        return cmpStyle.getPropertyValue(pName);
+      }
+
+      function getQueryRoot(el) {        
+        return el.shadowRoot || el;
+      }
+
+      function computeFormatProperties(format) {
+        function isString(obj) {
+          return Object.prototype.toString.apply(obj) === "[object String]";
+        }
+
+        var result = {
+          usesMeridiem: false,
+          hourFormat: '',
+          is24HourFormat: false,
+          minuteFormat: '',
+          hasSeconds: false,
+          secondsFormat: ''
+        }
+
+        if (!isString(format) || !format) return result;
+
+        result.usesMeridiem = format.indexOf('A') > -1;
+        if (result.usesMeridiem) {
+          format = format.replace(" A", "");
+        }
+
+        if (format.indexOf(':') < 0) return result;
+
+        var formatParts = format.split(':');
+        formatParts.forEach(function(part) { 
+          part = part.trim();
+          if (part.indexOf('h') > -1 || part.indexOf('H') > -1) {
+            result.hourFormat = part;
+            result.is24HourFormat = part.indexOf('H') > -1;
+          
+          } else if (part.indexOf('m') > -1) {
+            result.minuteFormat = part;
+          
+          } else if (part.indexOf('s') > -1) {
+            result.secondsFormat = part;
+            result.hasSeconds = true;
+          }
+        });
+
+        return result;
+      }
+
+      function assertElementUIByFormat(el) {
+        var formatProperties = computeFormatProperties(el._format);
+
+        // if format contains meridiem symbol, clockMeridiem UI element is visible
+        var hasHiddenClass = el.$.clockMeridiem.classList.contains('hidden');
+        assert.equal(formatProperties.usesMeridiem, !hasHiddenClass);
+
+        // if format doesnt have seconds symbol seconds divider is hidden
+        hasHiddenClass = el.$.secondsDivider.classList.contains('hidden');
+        assert.equal(formatProperties.hasSeconds, !hasHiddenClass);
+
+        // if format doesnt have seconds symbol clockSeconds ui element is hidden
+        hasHiddenClass = el.$.clockSeconds.classList.contains('hidden');
+        assert.equal(formatProperties.hasSeconds, !hasHiddenClass);
+
+        // if hour format is 24 hour format 24 hour fast picker is visible
+        hasHiddenClass = el.$.pick24Hours.classList.contains('hidden');
+        assert.equal(formatProperties.is24HourFormat, !hasHiddenClass);
+
+        hasHiddenClass = el.$.fastPickHours.classList.contains('hidden');
+        assert(true, hasHiddenClass);
+
+        hasHiddenClass = el.$.fastPickMinutesSeconds.classList.contains('hidden');
+        assert.equal(true, hasHiddenClass);
+
+        var numberButtons = Polymer.dom(el.root).querySelectorAll('.fast-pick-hour');
+        assert.equal(36, numberButtons.length);
+      }
+
+      function assertInitialState(el) {
+        var initialValue = el._currentMoment.format(el._format);
+        assertPropertyValue(el, 'value', initialValue);
+
+        assertElementUIByFormat(el);
+      }
+
+      function assertStateForInvalidValue(el, invalidValue) {
+        assertPropertyValue(el, 'value', invalidValue);
+
+        assertElementUIByFormat(el);
+      }
+
+      function assertStateForValidValue(el) { 
+        assertPropertyValue(el, 'value', '01:49 PM');
+
+        assertElementUIByFormat(el);
+      }
+
+      function qElt(el, selector) {
+        return Polymer.dom(el.root).querySelector(selector);
+      }
+
+      function qElts(el, selector) {
+        return Polymer.dom(el).querySelectorAll(selector);
+      }
+
+      function executeUIInteractions(el) {
+        var initialValue = el._currentMoment.format(el._format);
+        var initialMoment = moment(initialValue, el._format);
+
+        // inc hours by button
+        MockInteractions.tap(el.$['at-carbon-time-picker-hours-up']);
+
+        var actualValue = el.value;
+        var expValue = initialMoment.add(1, 'h');
+        expValue = expValue.format(el._format);
+        assert.equal(actualValue, expValue);
+
+        // dec hours by button
+        MockInteractions.tap(el.$['at-carbon-time-picker-hours-down']);
+
+        var actualValue = el.value;
+        var expValue = initialMoment.add(-1, 'h');
+        expValue = expValue.format(el._format);
+        assert.equal(actualValue, expValue);
+
+        // inc minutes by button
+        MockInteractions.tap(el.$['at-carbon-time-picker-minutes-up']);
+
+        var actualValue = el.value;
+        var expValue = initialMoment.add(1, 'm');
+        expValue = expValue.format(el._format);
+        assert.equal(actualValue, expValue);
+
+        // dec minutes by button
+        MockInteractions.tap(el.$['at-carbon-time-picker-minutes-down']);
+
+        var actualValue = el.value;
+        var expValue = initialMoment.add(-1, 'm');
+        expValue = expValue.format(el._format);
+        assert.equal(actualValue, expValue);
+        
+        // inc seconds by button; format dependent
+        var formatProperties = computeFormatProperties(el._format);
+        if (formatProperties.hasSeconds) {
+          MockInteractions.tap(el.$['at-carbon-time-picker-seconds-up']);
+
+          var actualValue = el.value;
+          var expValue = initialMoment.add(1, 's');
+          expValue = expValue.format(el._format);
+          assert.equal(actualValue, expValue);
+        }
+
+        // dec seconds by button; format dependent
+        if (formatProperties.hasSeconds) {
+          MockInteractions.tap(el.$['at-carbon-time-picker-seconds-down']);
+
+          var actualValue = el.value;
+          var expValue = initialMoment.add(-1, 's');
+          expValue = expValue.format(el._format);
+          assert.equal(actualValue, expValue);
+        }
+
+        // fast pick hours with numbers; format dependent (AM/PM)
+        // switch to fast pick hours mode            
+        MockInteractions.tap(el.$.hour);
+
+        var pickHourButtons = qElts(el.$.fastPickHours, '.fast-pick-hour');
+        if (!formatProperties.is24HourFormat){
+          pickHourButtons.splice(pickHourButtons.length/2);
+        }
+
+        pickHourButtons.forEach(function(button) { 
+          var hourValue = parseInt(button.textContent);
+          var expValue = initialMoment.hours(hourValue).format(el._format);
+
+          MockInteractions.tap(button);
+          var actValue = el.value;
+
+          assert.equal(expValue, actValue);
+        });
+
+        // fast pick minutes with numbers
+        // switch to fast pick minute mode
+        MockInteractions.tap(el.$.minute);
+
+        var pickMinuteButtons = qElts(el.$.fastPickMinutesSeconds, '.fast-pick-hour');
+        pickMinuteButtons.forEach(function(button) { 
+          var minuteValue = parseInt(button.textContent);
+          var expValue = initialMoment.minutes(minuteValue).format(el._format);
+
+          MockInteractions.tap(button);
+          var actValue = el.value;
+
+          assert.equal(expValue, actValue);
+        });
+
+        // fast pick seconds with numbers; format dependent
+        if (formatProperties.hasSeconds) {
+          MockInteractions.tap(el.$.second);
+
+          var pickSecondButtons = qElts(el.$.fastPickMinutesSeconds, '.fast-pick-hour');
+          pickSecondButtons.forEach(function(button) {
+            var minuteValue = parseInt(button.textContent);
+            var expValue = initialMoment.seconds(minuteValue).format(el._format);
+
+            MockInteractions.tap(button);
+            var actValue = el.value;
+
+            assert.equal(expValue, actValue);
+          });
+        }
+
+        // TODO(ij): poke the AM/PM button
+      }
+
+      suite('tests where properties are set as attributes', function() {
+        
+        test('test initial state', function() {
+          var el = fixture('initialState');
+          assertInitialState(el);
+
+          executeUIInteractions(el);
+        });
+
+        test('invalid value is set', function() {
+          var el = fixture('invalidValueSet');
+
+          var initialValue = el._currentMoment.format(el._format);
+          assertStateForInvalidValue(el, initialValue);
+
+          executeUIInteractions(el);
+        });
+
+        test('valid value is set', function() {
+          var el = fixture('validValueSet');
+          assertStateForValidValue(el);
+
+          executeUIInteractions(el);
+        });
+
+      });
+    
+      suite('tests were properties are set in code', function() {
+
+        test('test initial state', function() {
+          var el = fixture('initialState');
+          assertInitialState(el);
+
+          executeUIInteractions(el);
+        });
+
+        test('invalid value is set', function() {
+          var el = fixture('invalidValueSet');
+          assertInitialState(el);
+
+          var invalidValue = "13:49:00";
+          el.value = invalidValue;
+          assertStateForInvalidValue(el, invalidValue);
+
+          executeUIInteractions(el);
+        });
+
+        test('valid value is set', function() {
+          var el = fixture('validValueSet');
+          assertStateForValidValue(el);
+
+          el.value = "01:49 PM";
+          assertStateForValidValue(el);
+
+          executeUIInteractions(el);
+        });
+
+      });
+
+    });
+  </script>
+</body>
+</html>
