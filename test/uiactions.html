@@ -224,7 +224,7 @@
           pickHourButtons.splice(pickHourButtons.length/2);
         }
 
-        pickHourButtons.forEach(function(button) { 
+        pickHourButtons.forEach(function(button) {
           var hourValue = parseInt(button.textContent);
           var expValue = initialMoment.hours(hourValue).format(el._format);
 
@@ -265,7 +265,30 @@
           });
         }
 
-        // TODO(ij): poke the AM/PM button
+        // poke the AM/PM button
+        if (formatProperties.usesMeridiem) {
+          MockInteractions.tap(el.$.meridiem);
+          assertAMPMState(el, initialMoment);
+          MockInteractions.tap(el.$.meridiem);
+          assertAMPMState(el, initialMoment);
+          MockInteractions.tap(el.$.meridiem);
+          assertAMPMState(el, initialMoment);
+          MockInteractions.tap(el.$.meridiem);
+          assertAMPMState(el, initialMoment);
+        }
+      }
+
+      function assertAMPMState(el, initialMoment) {
+        var meridiemText = el.$.meridiem.textContent;
+        if (meridiemText === "AM") {
+          initialMoment.add(-12, 'h');
+        
+        } else {
+          initialMoment.add(12, 'h');
+        }
+        var expValue = initialMoment.format(el._format);
+        var actValue = el.value;
+        assert.equal(expValue, actValue);
       }
 
       suite('tests where properties are set as attributes', function() {
