@@ -154,7 +154,7 @@
         this.toggleClass('hidden', noSeconds, this.$.secondsDivider);
         this.toggleClass('hidden', noSeconds, this.$.clockSeconds);
 
-        var is24Hours = this._is24HourFormat();        
+        var is24Hours = this._is24HourFormat();
         this.toggleClass('hidden', !is24Hours, this.$.pick24Hours);
 
         var locale = this.getLocale();
